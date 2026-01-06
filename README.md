@@ -20,6 +20,19 @@
 - Python 3.11+ (project tested with Python 3.13 in a virtual environment)
 - System library: `libgphoto2` (required to communicate with camera)
   - macOS: `brew install gphoto2`
+  - **Windows:** Windows ships an MTP/PTP driver that typically prevents `libgphoto2` from accessing the camera. To allow gphoto2 to talk to the Sony A7 series on Windows you will usually need to replace the default driver with a libusb-compatible driver (e.g., **WinUSB** or **libusbK**).
+
+    Quick steps (use with admin privileges):
+    1. Download and run Zadig: https://zadig.akeo.ie/ (run as Administrator).
+    2. From the Options menu select **"List All Devices"**.
+    3. Select your camera device (may show as "MTP", "PTP", "Sony Camera", or similar).
+    4. Choose **WinUSB** (or **libusbK**) as the target driver and click **Install Driver**.
+    5. Reconnect the camera and verify with `gphoto2 --auto-detect` or your chosen client.
+
+    Notes:
+    - Replacing the driver may affect other applications (e.g., media import tools); to revert use Zadig to reinstall the original driver or run Windows Update.
+    - On Windows, gphoto2 commonly runs via MSYS2 or WSL (with USB passthrough); consult libgphoto2 documentation for platform-specific guidance.
+
 - Python packages (see `requirements.txt`), notably:
   - `flet` (UI)
   - `gphoto2` Python bindings (may also be provided by the OS packaging system)
