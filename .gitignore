@@ -1,0 +1,16 @@
+# Ignore log files
+*.log
+
+# Virtual environment
+env/
+
+# Downloaded captures and cached previews
+downloads/
+
+# Python specific
+__pycache__/
+*.py[cod]
+
+# Editor/temp files
+.vscode/
+.DS_Store

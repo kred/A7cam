@@ -1,0 +1,25 @@
+# Python package requirements for the Sony A7 III Live View Monitor
+# Install with: python -m pip install -r requirements.txt
+
+# Use unpinned package names to allow installing the latest versions.
+# For reproducible installs in CI, consider pinning versions or using a lock file.
+
+flet
+numpy
+opencv-python-headless
+Pillow
+httpx
+gphoto2
+rawpy
+
+# The python gphoto2 binding is required but may be provided by your OS or packaging system.
+# If a PyPI package is available in your environment, add it (for example `gphoto2`).
+# Otherwise install the system lib (libgphoto2) and Python bindings via your OS package manager.
+# Example (macOS): brew install gphoto2
+
+# Notes:
+# - libgphoto2 (system library) is required to talk to cameras.
+# - If you plan to run without a display (headless), use opencv-python-headless.
+# - Pillow is optional but recommended for EXIF parsing.
+# - To create a reproducible requirements file, run: python -m pip freeze > requirements.txt
+# - rawpy requires Python 3.13 or earlier.
