@@ -2,6 +2,12 @@
 
 **Short description:** A desktop live-view monitor for Sony A7 III that uses libgphoto2 and Flet to show camera previews, manage tethered downloads, and preview captured images.
 
+## Demo
+
+![Live view demo](img/a7cam.gif)
+
+*A short screencast showing the live preview, preview navigation and overlay guides.*
+
 ---
 
 ## ⚡ Features
