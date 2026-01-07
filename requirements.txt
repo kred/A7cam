@@ -1,4 +1,4 @@
-# Python package requirements for the Sony A7 III Live View Monitor
+# Python package requirements for StudioTether
 # Install with: python -m pip install -r requirements.txt
 
 # Use unpinned package names to allow installing the latest versions.

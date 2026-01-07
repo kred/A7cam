@@ -96,14 +96,14 @@ class ImagePreviewManager:
         
         Args:
             download_dir: Directory where downloaded files are stored. If None, defaults
-                to the user's Pictures folder (platform-specific) with an `A7Cam`
-                subdirectory (e.g., ~/Pictures/A7Cam).
+                to the user's Pictures folder (platform-specific) with a `StudioTether`
+                subdirectory (e.g., ~/Pictures/StudioTether).
             max_cache_size: Maximum number of images to cache
         """
         # Compute a sensible default download directory when not provided
         if download_dir is None:
             pictures_dir = get_user_pictures_dir()
-            download_dir = os.path.join(pictures_dir, "A7Cam")
+            download_dir = os.path.join(pictures_dir, "StudioTether")
 
         self.download_dir = download_dir
         # Ensure the download directory exists

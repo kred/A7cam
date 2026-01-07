@@ -1,6 +1,6 @@
-# Sony A7 III Live View Monitor 🎥
+# StudioTether 🎥
 
-**Short description:** A desktop live-view monitor for Sony A7 III that uses libgphoto2 and Flet to show camera previews, manage tethered downloads, and preview captured images.
+**Short description:** A lightweight desktop live-view tethering utility for mirrorless cameras (supports Sony mirrorless cameras such as the A7 series). It uses libgphoto2 and Flet to show camera previews, manage tethered downloads, and preview captured images.
 
 ## Demo
 
@@ -12,7 +12,7 @@
 
 ## ⚡ Features
 
-- Live view preview from Sony A7 III via libgphoto2
+- Live view preview from mirrorless cameras via libgphoto2 (supports Sony A7 series)
 - Automatic camera watcher and tether download handling
 - Embedded RAW thumbnail extraction (uses `rawpy` when available)
 - EXIF-aware preview rotation (uses `Pillow` when available)
@@ -93,12 +93,12 @@ Common keyboard shortcuts used in the app (works with regular keys, numpad varia
 - `A7CAM_LOG_FILE` — optional, path to write logs to
 - `A7CAM_DOWNLOAD_DIR` — optional, path to override the default download directory (useful if you want captures stored elsewhere)
 
-You can also pass `--download-dir /path/to/A7Cam` to `python main.py` (CLI option takes precedence over `A7CAM_DOWNLOAD_DIR`).
+You can also pass `--download-dir /path/to/StudioTether` to `python main.py` (CLI option takes precedence over `A7CAM_DOWNLOAD_DIR`).
 
 Example:
 
 ```bash
-A7CAM_LOG_LEVEL=DEBUG A7CAM_LOG_FILE=./a7cam.log python main.py --download-dir /Users/you/Pictures/A7Cam
+A7CAM_LOG_LEVEL=DEBUG A7CAM_LOG_FILE=./a7cam.log python main.py --download-dir /Users/you/Pictures/StudioTether
 ```
 ---
 
@@ -111,7 +111,7 @@ A7CAM_LOG_LEVEL=DEBUG A7CAM_LOG_FILE=./a7cam.log python main.py --download-dir /
 - `translations.py` — i18n strings used by the UI
 - `requirements.txt` — Python package dependencies
 
-Downloaded captures are stored by default under your system Pictures/Images folder in an `A7Cam` subdirectory (e.g., `~/Pictures/A7Cam`). You can override this location with the `--download-dir` CLI option or the `A7CAM_DOWNLOAD_DIR` environment variable.
+Downloaded captures are stored by default under your system Pictures/Images folder in a `StudioTether` subdirectory (e.g., `~/Pictures/StudioTether`). You can override this location with the `--download-dir` CLI option or the `A7CAM_DOWNLOAD_DIR` environment variable.
 
 ---
 

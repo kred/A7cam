@@ -1,6 +1,6 @@
 """
 Camera Handler Module
-Manages Sony A7 III camera connection, preview capture, and image processing.
+Manages camera connection, preview capture, and image processing for supported mirrorless cameras (e.g., Sony A7 series).
 """
 import gphoto2 as gp
 import cv2

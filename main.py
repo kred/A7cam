@@ -1,5 +1,5 @@
 """
-Sony A7 III Live View Monitor
+StudioTether
 Main application entry point.
 """
 import flet as ft
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     # Parse optional CLI arguments (download dir override) and respect env var
     import argparse
 
-    parser = argparse.ArgumentParser(description='Sony A7 III Live View Monitor')
+    parser = argparse.ArgumentParser(description='StudioTether — live view tethering for mirrorless cameras')
     parser.add_argument('--download-dir', help='Override default download directory (e.g., /Users/you/Pictures/A7Cam)')
     args = parser.parse_args()
 

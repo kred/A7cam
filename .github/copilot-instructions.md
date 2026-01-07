@@ -1,4 +1,4 @@
-# Copilot instructions — a7cam (Sony A7 III Live View Monitor)
+# Copilot instructions — a7cam (StudioTether)
 
 Purpose: Quickly orient an AI coding agent so it can be productive making focused changes in this repository.
 
