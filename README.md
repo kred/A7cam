@@ -83,6 +83,7 @@ Common keyboard shortcuts used in the app (works with regular keys, numpad varia
 - **Space** — Toggle preview mode / return to live view
 - **Left / Right Arrow** — Navigate previous / next preview image (only in preview mode)
 - **F** — Toggle full-screen mode (press again to restore previous size & position)
+- **H** — Show/hide keyboard shortcuts help overlay
 
 > Note: Some platforms may expose slightly different window attributes; the UI prefers the native window API when available and falls back to older page attributes when necessary.
 

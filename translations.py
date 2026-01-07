@@ -66,6 +66,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "tooltip_color_green": "Green guides — key C",
         "tooltip_color_red": "Red guides — key C",
         "tooltip_color_black": "Black guides — key C",
+        "help_text": "1 / Numpad1 / Digit1 — Rotation 0°\n2 / Numpad2 / Digit2 — Rotation 90°\n3 / Numpad3 / Digit3 — Rotation 180°\n4 / Numpad4 / Digit4 — Rotation 270°\n8 / Numpad8 / Digit8 — Preview duration 3s\n9 / Numpad9 / Digit9 — Preview duration 10s\n0 / Numpad0 / Digit0 — Preview always (infinite)\nG — Cycle composition guides (Shift+G reverse)\nC — Cycle guide color\nSpace — Toggle preview mode / return to live view\n← / → — Previous / Next preview image (in preview mode)\nF — Toggle full-screen mode\nH — Show / hide this help overlay",
     },
     "pl": {
         "app_title": "Monitor podglądu na żywo Sony A7 III",
@@ -123,6 +124,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "tooltip_color_green": "Zielone prowadnice — klawisz C",
         "tooltip_color_red": "Czerwone prowadnice — klawisz C",
         "tooltip_color_black": "Czarne prowadnice — klawisz C",
+        "help_text": "1 / Numpad1 / Digit1 — Obrót 0°\n2 / Numpad2 / Digit2 — Obrót 90°\n3 / Numpad3 / Digit3 — Obrót 180°\n4 / Numpad4 / Digit4 — Obrót 270°\n8 / Numpad8 / Digit8 — Podgląd 3s\n9 / Numpad9 / Digit9 — Podgląd 10s\n0 / Numpad0 / Digit0 — Podgląd zawsze (nieskończony)\nG — Przełącz prowadnice (Shift+G wstecz)\nC — Zmień kolor prowadnic\nSpacja — Przełącz podgląd / powrót do live\n← / → — Poprzednie / Następne zdjęcie podglądu\nF — Tryb pełnoekranowy\nH — Pokaż/ukryj pomoc",
     },
     "de": {
         "app_title": "Sony A7 III Live-Ansicht Monitor",
@@ -182,6 +184,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "tooltip_color_green": "Grüne Hilfslinien — Taste C",
         "tooltip_color_red": "Rote Hilfslinien — Taste C",
         "tooltip_color_black": "Schwarze Hilfslinien — Taste C",
+        "help_text": "1 / Numpad1 / Digit1 — Rotation 0°\n2 / Numpad2 / Digit2 — Rotation 90°\n3 / Numpad3 / Digit3 — Rotation 180°\n4 / Numpad4 / Digit4 — Rotation 270°\n8 / Numpad8 / Digit8 — Vorschau 3s\n9 / Numpad9 / Digit9 — Vorschau 10s\n0 / Numpad0 / Digit0 — Vorschau immer (unendlich)\nG — Führungen wechseln (Shift+G rückwärts)\nC — Führungsfarbe wechseln\nLeertaste — Vorschau umschalten / zurück zur Live-Ansicht\n← / → — Vorheriges / Nächstes Vorschaubild\nF — Vollbild umschalten\nH — Hilfe ein-/ausblenden",
     },
     "fr": {
         "app_title": "Moniteur en direct Sony A7 III",
@@ -241,6 +244,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "tooltip_color_green": "Guides verts — touche C",
         "tooltip_color_red": "Guides rouges — touche C",
         "tooltip_color_black": "Guides noirs — touche C",
+        "help_text": "1 / Numpad1 / Digit1 — Rotation 0°\n2 / Numpad2 / Digit2 — Rotation 90°\n3 / Numpad3 / Digit3 — Rotation 180°\n4 / Numpad4 / Digit4 — Rotation 270°\n8 / Numpad8 / Digit8 — Aperçu 3s\n9 / Numpad9 / Digit9 — Aperçu 10s\n0 / Numpad0 / Digit0 — Aperçu toujours (infini)\nG — Parcourir guides de composition (Shift+G inverse)\nC — Changer la couleur des guides\nEspace — Basculer aperçu / revenir en direct\n← / → — Précédent / Suivant (en mode aperçu)\nF — Basculer plein écran\nH — Afficher/masquer cette aide",
     },
     "es": {
         "app_title": "Monitor de vista en vivo Sony A7 III",
@@ -300,6 +304,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "tooltip_color_green": "Guías verdes — tecla C",
         "tooltip_color_red": "Guías rojas — tecla C",
         "tooltip_color_black": "Guías negras — tecla C",
+        "help_text": "1 / Numpad1 / Digit1 — Rotación 0°\n2 / Numpad2 / Digit2 — Rotación 90°\n3 / Numpad3 / Digit3 — Rotación 180°\n4 / Numpad4 / Digit4 — Rotación 270°\n8 / Numpad8 / Digit8 — Vista previa 3s\n9 / Numpad9 / Digit9 — Vista previa 10s\n0 / Numpad0 / Digit0 — Vista previa siempre (infinito)\nG — Ciclar guías de composición (Shift+G inverso)\nC — Cambiar color de guía\nEspacio — Alternar vista previa / volver a vista en vivo\n← / → — Imagen previa anterior / siguiente\nF — Alternar pantalla completa\nH — Mostrar/ocultar esta ayuda",
     },
     "it": {
         "app_title": "Monitor Live View Sony A7 III",
@@ -359,6 +364,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "tooltip_color_green": "Guide verdi — tasto C",
         "tooltip_color_red": "Guide rosse — tasto C",
         "tooltip_color_black": "Guide nere — tasto C",
+        "help_text": "1 / Numpad1 / Digit1 — Rotazione 0°\n2 / Numpad2 / Digit2 — Rotazione 90°\n3 / Numpad3 / Digit3 — Rotazione 180°\n4 / Numpad4 / Digit4 — Rotazione 270°\n8 / Numpad8 / Digit8 — Anteprima 3s\n9 / Numpad9 / Digit9 — Anteprima 10s\n0 / Numpad0 / Digit0 — Anteprima sempre (infinito)\nG — Cambia guide di composizione (Shift+G indietro)\nC — Cambia colore guide\nSpazio — Alterna anteprima / torna alla visuale live\n← / → — Precedente / Successivo (in modalità anteprima)\nF — Alterna modalità a schermo intero\nH — Mostra / nascondi questo aiuto",
     },
     "pt": {
         "app_title": "Monitor de visualização ao vivo Sony A7 III",
@@ -418,6 +424,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "tooltip_color_green": "Guias verdes — tecla C",
         "tooltip_color_red": "Guias vermelhas — tecla C",
         "tooltip_color_black": "Guias pretas — tecla C",
+        "help_text": "1 / Numpad1 / Digit1 — Pré-visualização 0°\n2 / Numpad2 / Digit2 — Pré-visualização 90°\n3 / Numpad3 / Digit3 — Pré-visualização 180°\n4 / Numpad4 / Digit4 — Pré-visualização 270°\n8 / Numpad8 / Digit8 — Pré-visualização 3s\n9 / Numpad9 / Digit9 — Pré-visualização 10s\n0 / Numpad0 / Digit0 — Pré-visualização sempre (infinito)\nG — Alternar guias de composição (Shift+G inverso)\nC — Alternar cor das guias\nEspaço — Alternar pré-visualização / voltar para live\n← / → — Anterior / Próxima imagem de pré-visualização\nF — Alternar ecrã completo\nH — Mostrar/ocultar esta ajuda",
     },
     "ru": {
         "app_title": "Монитор просмотра Sony A7 III",
@@ -477,6 +484,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "tooltip_color_green": "Зелёные направляющие — клавиша C",
         "tooltip_color_red": "Красные направляющие — клавиша C",
         "tooltip_color_black": "Чёрные направляющие — клавиша C",
+        "help_text": "1 / Numpad1 / Digit1 — Поворот 0°\n2 / Numpad2 / Digit2 — Поворот 90°\n3 / Numpad3 / Digit3 — Поворот 180°\n4 / Numpad4 / Digit4 — Поворот 270°\n8 / Numpad8 / Digit8 — Предпросмотр 3s\n9 / Numpad9 / Digit9 — Предпросмотр 10s\n0 / Numpad0 / Digit0 — Предпросмотр всегда (бесконечно)\nG — Переключить направляющие (Shift+G назад)\nC — Изменить цвет направляющих\nПробел — Переключить предпросмотр / возврат к живому просмотру\n← / → — Предыдущая / Следующая превью-изображение\nF — Переключить полноэкранный режим\nH — Показать/скрыть эту справку",
     },
     "ja": {
         "app_title": "Sony A7 III ライブビューモニター",
@@ -531,6 +539,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "tooltip_color_green": "緑のガイド — キー C",
         "tooltip_color_red": "赤いガイド — キー C",
         "tooltip_color_black": "黒いガイド — キー C",
+        "help_text": "1 / Numpad1 / Digit1 — 回転 0°\n2 / Numpad2 / Digit2 — 回転 90°\n3 / Numpad3 / Digit3 — 回転 180°\n4 / Numpad4 / Digit4 — 回転 270°\n8 / Numpad8 / Digit8 — プレビュー 3秒\n9 / Numpad9 / Digit9 — プレビュー 10秒\n0 / Numpad0 / Digit0 — 常にプレビュー（無限）\nG — ガイドを切替（Shift+G 逆）\nC — ガイド色を切替\nSpace — プレビュー切替 / ライブに戻る\n← / → — 前/次のプレビュー画像（プレビューモード）\nF — 全画面切替\nH — このヘルプを表示/非表示",
     },
     "zh": {
         "app_title": "Sony A7 III 实时取景监视器",
@@ -585,6 +594,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "tooltip_color_green": "绿色参考线 — 按键 C",
         "tooltip_color_red": "红色参考线 — 按键 C",
         "tooltip_color_black": "黑色参考线 — 按键 C",
+        "help_text": "1 / Numpad1 / Digit1 — 旋转 0°\n2 / Numpad2 / Digit2 — 旋转 90°\n3 / Numpad3 / Digit3 — 旋转 180°\n4 / Numpad4 / Digit4 — 旋转 270°\n8 / Numpad8 / Digit8 — 预览 3秒\n9 / Numpad9 / Digit9 — 预览 10秒\n0 / Numpad0 / Digit0 — 始终预览（无限）\nG — 切换构图导线（Shift+G 反向）\nC — 切换导线颜色\n空格 — 切换预览 / 返回实时视图\n← / → — 上一张 / 下一张预览图像\nF — 切换全屏模式\nH — 显示/隐藏此帮助",
     },
     "nl": {
         "app_title": "Sony A7 III Live View Monitor",
@@ -644,6 +654,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "tooltip_color_green": "Groene hulplijnen — toets C",
         "tooltip_color_red": "Rode hulplijnen — toets C",
         "tooltip_color_black": "Zwarte hulplijnen — toets C",
+        "help_text": "1 / Numpad1 / Digit1 — Rotatie 0°\n2 / Numpad2 / Digit2 — Rotatie 90°\n3 / Numpad3 / Digit3 — Rotatie 180°\n4 / Numpad4 / Digit4 — Rotatie 270°\n8 / Numpad8 / Digit8 — Voorbeeld 3s\n9 / Numpad9 / Digit9 — Voorbeeld 10s\n0 / Numpad0 / Digit0 — Voorbeeld altijd (oneindig)\nG — Wissel compositiehulpmiddelen (Shift+G terug)\nC — Wissel hulpkleur\nSpatie — Wissel voorbeeld / terug naar live-weergave\n← / → — Vorige / Volgende voorbeeldafbeelding\nF — Wissel volledig scherm\nH — Toon / verberg deze hulp",
     },
     "sv": {
         "app_title": "Sony A7 III Live View-monitor",
@@ -703,6 +714,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "tooltip_color_green": "Gröna hjälplinjer — tangent C",
         "tooltip_color_red": "Röda hjälplinjer — tangent C",
         "tooltip_color_black": "Svarta hjälplinjer — tangent C",
+        "help_text": "1 / Numpad1 / Digit1 — Rotation 0°\n2 / Numpad2 / Digit2 — Rotation 90°\n3 / Numpad3 / Digit3 — Rotation 180°\n4 / Numpad4 / Digit4 — Rotation 270°\n8 / Numpad8 / Digit8 — Förhandsvisning 3s\n9 / Numpad9 / Digit9 — Förhandsvisning 10s\n0 / Numpad0 / Digit0 — Förhandsvisning alltid (oändlig)\nG — Växla kompositionsguider (Shift+G bakåt)\nC — Växla guidefärg\nMellanslag — Växla förhandsvisning / återgå till livevy\n← / → — Föregående / Nästa förhandsvisningsbild\nF — Växla helskärm\nH — Visa / dölj denna hjälp",
     },
     "ko": {
         "app_title": "Sony A7 III 라이브 뷰 모니터",
@@ -761,6 +773,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "tooltip_color_green": "녹색 가이드 — 키 C",
         "tooltip_color_red": "적색 가이드 — 키 C",
         "tooltip_color_black": "흑색 가이드 — 키 C",
+        "help_text": "1 / Numpad1 / Digit1 — 회전 0°\n2 / Numpad2 / Digit2 — 회전 90°\n3 / Numpad3 / Digit3 — 회전 180°\n4 / Numpad4 / Digit4 — 회전 270°\n8 / Numpad8 / Digit8 — 미리보기 3초\n9 / Numpad9 / Digit9 — 미리보기 10초\n0 / Numpad0 / Digit0 — 항상 미리보기 (무한)\nG — 가이드 순환 (Shift+G 역방향)\nC — 가이드 색상 변경\n스페이스 — 미리보기 전환 / 라이브로 돌아가기\n← / → — 이전 / 다음 미리보기 이미지\nF — 전체화면 전환\nH — 이 도움말 표시/숨기기",
     },
 }
 

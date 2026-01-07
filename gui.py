@@ -70,6 +70,10 @@ class LiveViewGUI:
         # Saved window bounds for toggling full-screen mode
         self._saved_window_bounds = None
 
+        # Help overlay (toggle with 'H')
+        self._help_overlay = None
+        self._help_text = None
+
 
     def build(self, page: ft.Page):
         """
@@ -408,6 +412,33 @@ class LiveViewGUI:
             visible=False,  # Hidden by default
         )
 
+        # Help overlay (toggle with 'H') - compact centered box using translations
+        help_text = t('help_text')
+        help_lines = []
+        try:
+            for line in str(help_text).split('\n'):
+                help_lines.append(ft.Text(line, size=13, color=ft.Colors.WHITE70))
+        except Exception:
+            help_lines = [ft.Text('Keyboard Shortcuts', size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE70)]
+
+        help_inner = ft.Container(
+            content=ft.Column(help_lines, spacing=6, horizontal_alignment=ft.CrossAxisAlignment.BASELINE),
+            width=560,
+            height=350,
+            padding=ft.padding.all(12),
+            bgcolor="rgba(0,0,0,0.86)",
+            border_radius=8,
+            border=ft.border.all(1, ft.Colors.GREY_700),
+        )
+        self._help_text = help_inner
+        self._help_overlay = ft.Container(
+            content=ft.Column([help_inner], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
+            expand=True,
+            visible=False,
+            bgcolor="rgba(0,0,0,0.34)",
+            alignment=ft.Alignment.CENTER,
+        )
+
         # Track currently active rotation as integer degrees
         self._active_rotation = 0
 
@@ -565,6 +596,8 @@ class LiveViewGUI:
                 self._preview_filename_container,
                 self._preview_counter_container,
                 self._preview_hint_container,
+                # Help overlay sits on top of everything when visible
+                self._help_overlay,
             ],
             expand=True,
         )
@@ -752,6 +785,14 @@ class LiveViewGUI:
                     self._cycle_guide_color()
                     return
 
+                # Help overlay key: H toggles help in center of screen
+                if key == 'h':
+                    try:
+                        self._toggle_help_overlay()
+                    except Exception:
+                        logger.exception("Failed toggling help overlay")
+                    return
+
                 # Full-screen toggle: 'f' toggles full-screen and restores previous bounds
                 if key == 'f':
                     try:
@@ -818,6 +859,7 @@ class LiveViewGUI:
                             return
 
                         # Fallback: older attribute names on page (some runtimes expose them)
+
                         attrs = {
                             'window_full_screen': getattr(self.page, 'window_full_screen', None),
                             'window_width': getattr(self.page, 'window_width', None),
@@ -862,6 +904,8 @@ class LiveViewGUI:
                             self.page.update()
                         except Exception:
                             pass
+
+
                     except Exception:
                         logger.exception("Failed toggling full-screen")
                     return
@@ -1225,6 +1269,34 @@ class LiveViewGUI:
                             pass
         except Exception:
             pass
+
+    def _toggle_help_overlay(self):
+        """Toggle visibility of the centered help overlay."""
+        try:
+            if not hasattr(self, '_help_overlay') or self._help_overlay is None:
+                return
+            vis = not getattr(self._help_overlay, 'visible', False)
+            self._help_overlay.visible = vis
+            if vis:
+                # When showing help, hide preview overlay and HUD so help is clear
+                try:
+                    if hasattr(self, '_preview_overlay') and self._preview_overlay is not None:
+                        self._preview_overlay.visible = False
+                    if hasattr(self, '_preview_filename_container') and self._preview_filename_container is not None:
+                        self._preview_filename_container.visible = False
+                    if hasattr(self, '_preview_counter_container') and self._preview_counter_container is not None:
+                        self._preview_counter_container.visible = False
+                    if hasattr(self, '_preview_hint_container') and self._preview_hint_container is not None:
+                        self._preview_hint_container.visible = False
+                except Exception:
+                    pass
+            # Trigger UI refresh
+            try:
+                self.page.update()
+            except Exception:
+                pass
+        except Exception:
+            logger.exception("Failed toggling help overlay")
 
 
     def _on_camera_detected(self, success, msg):
