@@ -89,15 +89,17 @@ Common keyboard shortcuts used in the app (works with regular keys, numpad varia
 
 ## ⚙️ Configuration / Environment
 
-- `A7CAM_LOG_LEVEL` — optional, defaults to `INFO` (e.g. `DEBUG`)
+- `A7CAM_LOG_LEVEL` — optional, defaults to `WARNING` (e.g. `DEBUG`)
 - `A7CAM_LOG_FILE` — optional, path to write logs to
+- `A7CAM_DOWNLOAD_DIR` — optional, path to override the default download directory (useful if you want captures stored elsewhere)
+
+You can also pass `--download-dir /path/to/A7Cam` to `python main.py` (CLI option takes precedence over `A7CAM_DOWNLOAD_DIR`).
 
 Example:
 
 ```bash
-A7CAM_LOG_LEVEL=DEBUG A7CAM_LOG_FILE=./a7cam.log python main.py
+A7CAM_LOG_LEVEL=DEBUG A7CAM_LOG_FILE=./a7cam.log python main.py --download-dir /Users/you/Pictures/A7Cam
 ```
-
 ---
 
 ## 📁 Key files & responsibilities
@@ -109,7 +111,7 @@ A7CAM_LOG_LEVEL=DEBUG A7CAM_LOG_FILE=./a7cam.log python main.py
 - `translations.py` — i18n strings used by the UI
 - `requirements.txt` — Python package dependencies
 
-Downloaded captures are stored under `./downloads` (configured in `CameraHandler`).
+Downloaded captures are stored by default under your system Pictures/Images folder in an `A7Cam` subdirectory (e.g., `~/Pictures/A7Cam`). You can override this location with the `--download-dir` CLI option or the `A7CAM_DOWNLOAD_DIR` environment variable.
 
 ---
 

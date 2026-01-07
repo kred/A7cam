@@ -25,7 +25,57 @@ RAW_EXTENSIONS = {'.arw', '.nef', '.cr2', '.cr3', '.rw2', '.raf', '.orf', '.dng'
 JPEG_EXTENSIONS = {'.jpg', '.jpeg'}
 
 import logging
+from pathlib import Path
+import platform
+import re
+
 logger = logging.getLogger(__name__)
+
+
+def get_user_pictures_dir() -> str:
+    """Return the user's Pictures/Images directory for the current platform.
+
+    Strategy (platform-specific):
+      - Windows: use SHGetFolderPathW (CSIDL_MYPICTURES) via ctypes when available
+      - Linux: parse ~/.config/user-dirs.dirs for XDG_PICTURES_DIR when present
+      - macOS/Other: fall back to ~/Pictures
+
+    Return value is an absolute path string.
+    """
+    home = Path.home()
+    system = platform.system()
+
+    # Windows: try SHGetFolderPathW (CSIDL_MYPICTURES = 0x0027)
+    if system == "Windows":
+        try:
+            import ctypes
+            buf = ctypes.create_unicode_buffer(260)
+            res = ctypes.windll.shell32.SHGetFolderPathW(None, 0x0027, None, 0, buf)
+            if res == 0 and buf.value:
+                return str(Path(buf.value))
+        except Exception:
+            pass
+        # Fallback
+        return str(home / "Pictures")
+
+    # Linux: parse XDG user dirs config
+    if system == "Linux":
+        try:
+            cfg = home / ".config" / "user-dirs.dirs"
+            if cfg.exists():
+                txt = cfg.read_text()
+                m = re.search(r'XDG_PICTURES_DIR=(?P<val>.+)$', txt, flags=re.MULTILINE)
+                if m:
+                    val = m.group('val').strip().strip('"')
+                    val = val.replace('$HOME', str(home))
+                    p = Path(val).expanduser()
+                    return str(p)
+        except Exception:
+            pass
+        return str(home / "Pictures")
+
+    # macOS and other: default to ~/Pictures
+    return str(home / "Pictures")
 
 
 @dataclass
@@ -40,15 +90,28 @@ class CachedImage:
 class ImagePreviewManager:
     """Manages image preview extraction, caching, and navigation."""
     
-    def __init__(self, download_dir: str = "./downloads", max_cache_size: int = 50):
+    def __init__(self, download_dir: Optional[str] = None, max_cache_size: int = 50):
         """
         Initialize the preview manager.
         
         Args:
-            download_dir: Directory where downloaded files are stored
+            download_dir: Directory where downloaded files are stored. If None, defaults
+                to the user's Pictures folder (platform-specific) with an `A7Cam`
+                subdirectory (e.g., ~/Pictures/A7Cam).
             max_cache_size: Maximum number of images to cache
         """
+        # Compute a sensible default download directory when not provided
+        if download_dir is None:
+            pictures_dir = get_user_pictures_dir()
+            download_dir = os.path.join(pictures_dir, "A7Cam")
+
         self.download_dir = download_dir
+        # Ensure the download directory exists
+        try:
+            os.makedirs(self.download_dir, exist_ok=True)
+        except Exception as e:
+            logger.warning("Could not create download dir %s: %s", self.download_dir, e)
+
         self.max_cache_size = max_cache_size
         self._cache: List[CachedImage] = []
         self._cache_lock = threading.Lock()
@@ -66,28 +129,39 @@ class ImagePreviewManager:
         self._preview_callback = callback
     
     def cleanup_download_folder(self):
-        """Remove RAW files from download folder on app startup (keep JPEGs)."""
+        """Scan the download folder and load any existing JPEGs into the cache.
+
+        IMPORTANT: This no longer deletes files on startup. Existing RAW/JPEG files
+        are preserved and any found JPEGs are loaded into the in-memory cache so
+        they are available for preview navigation.
+        """
         try:
-            if os.path.exists(self.download_dir):
-                jpeg_files = []
-                for filename in os.listdir(self.download_dir):
-                    filepath = os.path.join(self.download_dir, filename)
-                    try:
-                        if os.path.isfile(filepath):
-                            ext = os.path.splitext(filename)[1].lower()
-                            # Only remove RAW files and system files, keep JPEGs
-                            if ext in RAW_EXTENSIONS or ext in JPEG_EXTENSIONS or filename.startswith('.'):
-                                os.remove(filepath)
-                                logger.debug("Cleanup: removed %s", filename)
-                    except Exception as e:
-                        logger.warning("Cleanup: failed to remove %s: %s", filename, e)
-                
-                # Load existing JPEGs into cache
-                if jpeg_files:
-                    logger.info("Cleanup: loading %d existing JPEG(s) into cache", len(jpeg_files))
-                    jpeg_files.sort()  # Sort by filename
-                    for filepath, filename in jpeg_files:
-                        self._load_jpeg_to_cache(filepath, filename)
+            # Ensure the download directory exists
+            if not os.path.exists(self.download_dir):
+                try:
+                    os.makedirs(self.download_dir, exist_ok=True)
+                except Exception as e:
+                    logger.warning("Could not create download dir %s: %s", self.download_dir, e)
+                    return
+
+            jpeg_files = []
+            for filename in os.listdir(self.download_dir):
+                filepath = os.path.join(self.download_dir, filename)
+                try:
+                    if os.path.isfile(filepath):
+                        ext = os.path.splitext(filename)[1].lower()
+                        # Only consider JPEG files for loading into cache
+                        if ext in JPEG_EXTENSIONS:
+                            jpeg_files.append((filepath, filename))
+                except Exception as e:
+                    logger.warning("Cleanup: failed to inspect %s: %s", filename, e)
+
+            # Load existing JPEGs into cache (sorted for deterministic order)
+            if jpeg_files:
+                logger.info("Loading %d existing JPEG(s) into cache", len(jpeg_files))
+                jpeg_files.sort()
+                for filepath, filename in jpeg_files:
+                    self._load_jpeg_to_cache(filepath, filename)
         except Exception as e:
             logger.warning("Cleanup failed: %s", e)
     

@@ -21,14 +21,23 @@ logger = logging.getLogger(__name__)
 class LiveViewGUI:
     """Main GUI controller for the live view application."""
     
-    def __init__(self, camera_handler):
+    def __init__(self, camera_handler, download_dir: str = None):
         """
         Initialize GUI with camera handler.
         
         Args:
             camera_handler: Instance of CameraHandler
+            download_dir: Optional override for the preview download directory. If None,
+                the ImagePreviewManager will pick a sensible platform-specific default.
         """
         self.camera = camera_handler
+        # Preview manager lets the GUI show and navigate captured images
+        try:
+            self._preview_manager = ImagePreviewManager(download_dir=download_dir)
+        except Exception:
+            # Fallback to default constructor if something goes wrong
+            self._preview_manager = ImagePreviewManager()
+
         self.streaming_event = threading.Event()
         self.frame_thread = None
         

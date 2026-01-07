@@ -66,6 +66,9 @@ for h in logging.getLogger().handlers:
 logger = logging.getLogger(__name__)
 logger.info("Starting application")
 
+# Module-level variable that may be set from CLI or environment before launching the UI
+DOWNLOAD_DIR = None
+
 
 def main(page: ft.Page):
     """
@@ -77,11 +80,21 @@ def main(page: ft.Page):
     # Initialize camera handler
     camera = CameraHandler()
     
-    # Initialize and build GUI
-    gui = LiveViewGUI(camera)
+    # Initialize and build GUI, pass through optional download dir override
+    gui = LiveViewGUI(camera, download_dir=DOWNLOAD_DIR)
     gui.build(page)
 
 
 if __name__ == "__main__":
+    # Parse optional CLI arguments (download dir override) and respect env var
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Sony A7 III Live View Monitor')
+    parser.add_argument('--download-dir', help='Override default download directory (e.g., /Users/you/Pictures/A7Cam)')
+    args = parser.parse_args()
+
+    # CLI arg takes precedence over env var
+    DOWNLOAD_DIR = args.download_dir or os.environ.get('A7CAM_DOWNLOAD_DIR')
+
     # Launch Flet application
     ft.run(main, view=ft.AppView.FLET_APP)
