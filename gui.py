@@ -385,12 +385,6 @@ class LiveViewGUI:
             color=ft.Colors.WHITE70,
         )
         
-        self._preview_hint_text = ft.Text(
-            value=t('preview_hint'),
-            size=11,
-            color=ft.Colors.WHITE54,
-        )
-        
         # Preview overlay container (hidden by default)
         self._preview_overlay = ft.Container(
             content=ft.Stack([
@@ -469,19 +463,6 @@ class LiveViewGUI:
             visible=False,
             expand=False,
         )
-
-        # Preview keyboard hint displayed near top-right below rotation buttons
-        self._preview_hint_container = ft.Container(
-            content=self._preview_hint_text,
-            right=12,
-            top=40,
-            padding=ft.padding.symmetric(horizontal=10, vertical=6),
-            bgcolor="rgba(0,0,0,0.70)",
-            border_radius=8,
-            visible=False,
-            expand=False,
-        )
-
 
 
         # Ensure UI has correct selection
@@ -595,7 +576,6 @@ class LiveViewGUI:
                 # Preview HUD elements (appear on top of controls when previewing)
                 self._preview_filename_container,
                 self._preview_counter_container,
-                self._preview_hint_container,
                 # Help overlay sits on top of everything when visible
                 self._help_overlay,
             ],
@@ -1286,8 +1266,6 @@ class LiveViewGUI:
                         self._preview_filename_container.visible = False
                     if hasattr(self, '_preview_counter_container') and self._preview_counter_container is not None:
                         self._preview_counter_container.visible = False
-                    if hasattr(self, '_preview_hint_container') and self._preview_hint_container is not None:
-                        self._preview_hint_container.visible = False
                 except Exception:
                     pass
             # Trigger UI refresh
@@ -2004,7 +1982,6 @@ class LiveViewGUI:
                 # Always ensure HUD elements are visible when previewing
                 self._preview_filename_container.visible = True
                 self._preview_counter_container.visible = True
-                self._preview_hint_container.visible = True
             except Exception:
                 pass
             self.page.update()
@@ -2026,7 +2003,6 @@ class LiveViewGUI:
             try:
                 self._preview_filename_container.visible = False
                 self._preview_counter_container.visible = False
-                self._preview_hint_container.visible = False
                 # restore previous status
                 prev = getattr(self, '_prev_status', None)
                 if prev:
