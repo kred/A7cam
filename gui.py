@@ -213,7 +213,27 @@ class LiveViewGUI:
             self._rotation_buttons[val] = btn
             return btn
 
+        # Autorotate toggle button
+        def _make_autorotate_btn():
+            def _on_click(e):
+                self._toggle_autorotate()
+            icon = ft.Icon(ft.Icons.SCREEN_ROTATION, color=ft.Colors.WHITE)
+            btn = ft.Container(
+                content=icon,
+                width=ROT_BTN_HEIGHT,
+                height=ROT_BTN_HEIGHT,
+                alignment=ft.Alignment.CENTER,
+                tooltip=t('tooltip_autorotate'),
+                border=ft.border.all(1, ft.Colors.GREY_700),
+                border_radius=6,
+                on_click=_on_click,
+            )
+            # Store reference for runtime updates
+            self._autorotate_btn = btn
+            return btn
+
         rotation_btns = [
+            _make_autorotate_btn(),
             _make_rotation_btn("0", t('rotate_0_label'), t('tooltip_rotation_0')),
             _make_rotation_btn("90", t('rotate_90_label'), t('tooltip_rotation_90')),
             _make_rotation_btn("180", t('rotate_180_label'), t('tooltip_rotation_180')),
@@ -427,7 +447,8 @@ class LiveViewGUI:
         help_inner = ft.Container(
             content=ft.Column(help_lines, spacing=6, horizontal_alignment=ft.CrossAxisAlignment.BASELINE),
             width=560,
-            height=350,
+            height=370,
+            offset=ft.Offset(0, -0.15),
             padding=ft.padding.all(12),
             bgcolor="rgba(0,0,0,0.86)",
             border_radius=8,
@@ -444,6 +465,9 @@ class LiveViewGUI:
 
         # Track currently active rotation as integer degrees
         self._active_rotation = 0
+        # Auto-rotate setting (enabled by default)
+        self._autorotate_enabled = True
+        self._autorotate_btn = None
 
         # HUD elements for preview (outside preview overlay so they can appear above controls)
         self._preview_filename_container = ft.Container(
@@ -477,6 +501,19 @@ class LiveViewGUI:
         # Ensure UI has correct selection
         try:
             self._set_active_rotation(self._active_rotation)
+        except Exception:
+            pass
+
+        # Initialize autorotate button reference and UI
+        try:
+            # Ensure autorotate button reference exists and update its UI
+            if not hasattr(self, '_autorotate_btn') or self._autorotate_btn is None:
+                try:
+                    if hasattr(self, 'rotate_control') and self.rotate_control is not None and len(self.rotate_control.controls) > 0:
+                        self._autorotate_btn = self.rotate_control.controls[0]
+                except Exception:
+                    pass
+            self._update_autorotate_ui()
         except Exception:
             pass
 
@@ -782,6 +819,14 @@ class LiveViewGUI:
                         logger.exception("Failed toggling help overlay")
                     return
 
+                # Autorotate toggle: 'A' toggles automatic rotation
+                if key == 'a':
+                    try:
+                        self._toggle_autorotate()
+                    except Exception:
+                        logger.exception("Failed toggling autorotate")
+                    return
+
                 # Full-screen toggle: 'f' toggles full-screen and restores previous bounds
                 if key == 'f':
                     try:
@@ -1025,7 +1070,8 @@ class LiveViewGUI:
             # Enable tethering with preview callback
             self.camera.start_tether(callback=self._preview_manager.process_downloaded_file)
             self._preview_manager.set_preview_callback(self._on_new_preview)
-            logger.info("GUI: Preview callback registered, tether started")
+            self._preview_manager.set_orientation_callback(self._on_orientation_detected)
+            logger.info("GUI: Preview and orientation callbacks registered, tether started")
             # Sync active rotation button with camera state
             try:
                 self._sync_rotation_from_camera()
@@ -1275,8 +1321,10 @@ class LiveViewGUI:
                         self._preview_filename_container.visible = False
                     if hasattr(self, '_preview_counter_container') and self._preview_counter_container is not None:
                         self._preview_counter_container.visible = False
+
                 except Exception:
                     pass
+
             # Trigger UI refresh
             try:
                 self.page.update()
@@ -1386,6 +1434,15 @@ class LiveViewGUI:
                     btn.bgcolor = None
                     btn.border = ft.border.all(1, ft.Colors.GREY_700)
             
+            # Update autorotate UI in case manual rotation implies user preference
+            try:
+                # If user manually rotates, disable autorotate so it doesn't override
+                if getattr(self, '_autorotate_enabled', True):
+                    self._autorotate_enabled = False
+                    self._update_autorotate_ui()
+            except Exception:
+                pass
+
             # Update guide overlays when rotation changes
             self._update_guide_canvas()
             self._update_preview_guide_canvas()
@@ -2055,6 +2112,16 @@ class LiveViewGUI:
                 self._preview_timer.cancel()
                 self._preview_timer = None
             
+            # Ensure autorotate HUD is not left in a strange visible state
+            try:
+                if hasattr(self, '_autorotate_btn') and self._autorotate_btn is not None:
+                    try:
+                        self._autorotate_btn.visible = True
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+            
             self.page.update()
             
         except Exception as e:
@@ -2089,6 +2156,96 @@ class LiveViewGUI:
     async def _hide_preview_async(self):
         """Async wrapper to hide preview on main loop."""
         self._hide_preview()
+
+    def _toggle_autorotate(self):
+        """Toggle the autorotate setting and update UI."""
+        try:
+            self._autorotate_enabled = not getattr(self, '_autorotate_enabled', True)
+            logger.info("Autorotate %s", 'enabled' if self._autorotate_enabled else 'disabled')
+            self._update_autorotate_ui()
+        except Exception as e:
+            logger.exception("Failed to toggle autorotate")
+
+    def _update_autorotate_ui(self):
+        """Update the autorotate button appearance to reflect current state."""
+        try:
+            btn = getattr(self, '_autorotate_btn', None)
+            if not btn:
+                return
+            # The button content is an Icon; change color to indicate enabled/disabled
+            try:
+                icon = getattr(btn, 'content', None)
+                if icon and hasattr(icon, 'color'):
+                    icon.color = ft.Colors.AMBER_400 if self._autorotate_enabled else ft.Colors.WHITE54
+            except Exception:
+                pass
+
+            # Background highlight when enabled
+            try:
+                if self._autorotate_enabled:
+                    btn.bgcolor = "rgba(100,100,255,0.18)"
+                    btn.border = ft.border.all(2, ft.Colors.BLUE_400)
+                else:
+                    btn.bgcolor = None
+                    btn.border = ft.border.all(1, ft.Colors.GREY_700)
+            except Exception:
+                pass
+
+            try:
+                btn.update()
+            except Exception:
+                pass
+        except Exception as e:
+            logger.exception("_update_autorotate_ui error")
+    
+    def _on_orientation_detected(self, orientation_code: int):
+        """Callback invoked when EXIF orientation is detected from a downloaded image.
+        
+        Automatically rotates the live view to match the camera orientation (if enabled).
+        
+        Args:
+            orientation_code: EXIF orientation value (1, 3, 6, or 8)
+        """
+        try:
+            # Respect user preference: only auto-rotate when enabled
+            if not getattr(self, '_autorotate_enabled', True):
+                logger.debug("Autorotate disabled — ignoring detected orientation %s", orientation_code)
+                return
+
+            # Map EXIF orientation to camera handler orientation
+            # EXIF 1 = Normal (0°) -> ORIENTATION_NORMAL
+            # EXIF 3 = 180° -> ORIENTATION_180
+            # EXIF 6 = 270° -> ORIENTATION_270
+            # EXIF 8 = 90° -> ORIENTATION_90
+            if orientation_code == 1:
+                deg = 0
+            elif orientation_code == 3:
+                deg = 180
+            elif orientation_code == 6:
+                deg = 270
+            elif orientation_code == 8:
+                deg = 90
+            else:
+                logger.warning("Unknown orientation code: %s", orientation_code)
+                return
+            
+            logger.info("Auto-rotating live view to %d° based on captured image EXIF", deg)
+            
+            # Update camera orientation
+            orientation_map = {
+                0: self.camera.ORIENTATION_NORMAL,
+                90: self.camera.ORIENTATION_90,
+                180: self.camera.ORIENTATION_180,
+                270: self.camera.ORIENTATION_270,
+            }
+            code = orientation_map.get(deg, self.camera.ORIENTATION_NORMAL)
+            self.camera.set_orientation(code)
+            
+            # Update UI to reflect new rotation
+            self._set_active_rotation(deg)
+            
+        except Exception as e:
+            logger.exception("Failed to auto-rotate from EXIF orientation")
 
 
 

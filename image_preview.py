@@ -120,6 +120,9 @@ class ImagePreviewManager:
         # Callback for when a new image is ready to preview
         self._preview_callback: Optional[Callable[[CachedImage], None]] = None
         
+        # Callback for when orientation should be updated (receives orientation code)
+        self._orientation_callback: Optional[Callable[[int], None]] = None
+        
         # Track pending RAW files waiting for their JPEG pair
         self._pending_raw: dict = {}  # filename_base -> (raw_path, timestamp)
         self._pair_timeout = 2.0  # seconds to wait for RAW+JPEG pair
@@ -127,6 +130,15 @@ class ImagePreviewManager:
     def set_preview_callback(self, callback: Callable[[CachedImage], None]):
         """Set callback invoked when a new preview is ready."""
         self._preview_callback = callback
+    
+    def set_orientation_callback(self, callback: Callable[[int], None]):
+        """Set callback invoked when camera orientation should be updated.
+        
+        Args:
+            callback: Function that accepts an orientation code (1, 3, 6, or 8)
+                matching EXIF orientation values and camera handler constants.
+        """
+        self._orientation_callback = callback
     
     def cleanup_download_folder(self):
         """Scan the download folder and load any existing JPEGs into the cache.
@@ -281,6 +293,22 @@ class ImagePreviewManager:
         try:
             filename = os.path.basename(filepath)
             
+            # Extract EXIF orientation before processing
+            orientation_code = None
+            if HAS_PIL:
+                try:
+                    with Image.open(filepath) as img:
+                        orientation_code = self._extract_exif_orientation(img)
+                except Exception:
+                    pass
+            
+            # Notify camera to auto-rotate live view if orientation detected
+            if orientation_code and self._orientation_callback:
+                try:
+                    self._orientation_callback(orientation_code)
+                except Exception as e:
+                    logger.warning("Orientation callback failed: %s", e)
+            
             # Save to disk with .jpg extension
             base_name = os.path.splitext(filename)[0]
             jpeg_filename = f"{base_name}.jpg"
@@ -417,7 +445,6 @@ class ImagePreviewManager:
             if jpegs:
                 # Return the largest JPEG
                 largest = max(jpegs, key=len)
-
                 return largest
             
             logger.debug("ImagePreview: no embedded JPEG found in RAW file")
@@ -425,6 +452,48 @@ class ImagePreviewManager:
             
         except Exception as e:
             logger.warning("ImagePreview: failed to extract JPEG from RAW: %s", e)
+            return None
+    
+    def _extract_exif_orientation(self, img: Image.Image) -> Optional[int]:
+        """Extract EXIF orientation value from image.
+        
+        Args:
+            img: PIL Image object
+            
+        Returns:
+            EXIF orientation value (1, 3, 6, or 8) or None if not found.
+            These values match camera handler orientation constants:
+            - 1 = Normal (0°)
+            - 3 = Rotated 180°
+            - 6 = Rotated 270° (90° CCW)
+            - 8 = Rotated 90° (90° CW)
+        """
+        try:
+            exif = img.getexif()
+            if not exif:
+                return None
+            
+            # Find orientation tag
+            orientation_tag = None
+            for tag_id, tag_name in ExifTags.TAGS.items():
+                if tag_name == 'Orientation':
+                    orientation_tag = tag_id
+                    break
+            
+            if orientation_tag is None or orientation_tag not in exif:
+                return None
+            
+            orientation = exif[orientation_tag]
+            
+            # Only return values that map to camera orientations (1, 3, 6, 8)
+            # Ignore flipped orientations (2, 4, 5, 7) as they don't apply to live view
+            if orientation in (1, 3, 6, 8):
+                return orientation
+            
+            return None
+            
+        except Exception as e:
+            logger.debug("EXIF orientation extraction failed: %s", e)
             return None
     
     def _apply_exif_rotation(self, img: Image.Image) -> Image.Image:
