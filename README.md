@@ -67,6 +67,25 @@ The app opens a Flet desktop window showing the live preview and status. The app
 
 ---
 
+## ⌨️ Keyboard Shortcuts
+
+Common keyboard shortcuts used in the app (works with regular keys, numpad variants, and on most platforms):
+
+- **1** / **Numpad1** / **Digit1** — Rotation **0°** (normal)
+- **2** / **Numpad2** / **Digit2** — Rotation **90°**
+- **3** / **Numpad3** / **Digit3** — Rotation **180°**
+- **4** / **Numpad4** / **Digit4** — Rotation **270°**
+- **8** / **Numpad8** / **Digit8** — Set preview duration to **3s**
+- **9** / **Numpad9** / **Digit9** — Set preview duration to **10s**
+- **0** / **Numpad0** / **Digit0** — Set preview duration to **Always** (infinite)
+- **G** — Cycle composition guides (press **Shift+G** to cycle backwards)
+- **C** — Cycle guide color (white, green, red, black)
+- **Space** — Toggle preview mode / return to live view
+- **Left / Right Arrow** — Navigate previous / next preview image (only in preview mode)
+- **F** — Toggle full-screen mode (press again to restore previous size & position)
+
+> Note: Some platforms may expose slightly different window attributes; the UI prefers the native window API when available and falls back to older page attributes when necessary.
+
 ## ⚙️ Configuration / Environment
 
 - `A7CAM_LOG_LEVEL` — optional, defaults to `INFO` (e.g. `DEBUG`)
