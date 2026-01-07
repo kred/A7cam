@@ -67,6 +67,9 @@ class LiveViewGUI:
         self._preview_filename_text = None
         self._preview_counter_text = None
 
+        # Saved window bounds for toggling full-screen mode
+        self._saved_window_bounds = None
+
 
     def build(self, page: ft.Page):
         """
@@ -747,7 +750,122 @@ class LiveViewGUI:
                 # Guide color key: C cycles through guide colors
                 if key == 'c':
                     self._cycle_guide_color()
-                    return                
+                    return
+
+                # Full-screen toggle: 'f' toggles full-screen and restores previous bounds
+                if key == 'f':
+                    try:
+                        # If a Window object exists on the page, prefer toggling it directly
+                        win = getattr(self.page, 'window', None)
+                        if win is not None:
+                            # Log current window state
+                            try:
+                                attrs = {
+                                    'full_screen': getattr(win, 'full_screen', None),
+                                    'width': getattr(win, 'width', None),
+                                    'height': getattr(win, 'height', None),
+                                    'left': getattr(win, 'left', None),
+                                    'top': getattr(win, 'top', None),
+                                    'maximized': getattr(win, 'maximized', None),
+                                }
+                            except Exception:
+                                attrs = {'full_screen': None}
+                            logger.info("F key pressed; window attrs: %s", attrs)
+
+                            current_fs = getattr(win, 'full_screen', False)
+                            if not current_fs:
+                                # Save current bounds (may be None on some platforms)
+                                self._saved_window_bounds = {
+                                    'width': getattr(win, 'width', None),
+                                    'height': getattr(win, 'height', None),
+                                    'left': getattr(win, 'left', None),
+                                    'top': getattr(win, 'top', None),
+                                    'maximized': getattr(win, 'maximized', None),
+                                }
+                                try:
+                                    win.full_screen = True
+                                    logger.debug("Set window.full_screen = True")
+                                    win.update()
+                                except Exception:
+                                    logger.exception("Failed setting window.full_screen")
+                                logger.debug("Entering full-screen (saved bounds: %s)", self._saved_window_bounds)
+                            else:
+                                try:
+                                    win.full_screen = False
+                                    logger.debug("Set window.full_screen = False")
+                                    win.update()
+                                except Exception:
+                                    logger.exception("Failed unsetting window.full_screen")
+                                b = getattr(self, '_saved_window_bounds', None)
+                                if b:
+                                    try:
+                                        if b.get('width') is not None:
+                                            win.width = b['width']
+                                        if b.get('height') is not None:
+                                            win.height = b['height']
+                                        if b.get('left') is not None:
+                                            win.left = b['left']
+                                        if b.get('top') is not None:
+                                            win.top = b['top']
+                                        if b.get('maximized') is not None:
+                                            win.maximized = b['maximized']
+                                        win.update()
+                                    except Exception:
+                                        logger.exception("Failed restoring window bounds")
+                                    finally:
+                                        self._saved_window_bounds = None
+                                logger.debug("Exiting full-screen, restored bounds")
+                            return
+
+                        # Fallback: older attribute names on page (some runtimes expose them)
+                        attrs = {
+                            'window_full_screen': getattr(self.page, 'window_full_screen', None),
+                            'window_width': getattr(self.page, 'window_width', None),
+                            'window_height': getattr(self.page, 'window_height', None),
+                            'window_x': getattr(self.page, 'window_x', None),
+                            'window_y': getattr(self.page, 'window_y', None),
+                        }
+                        logger.debug("F key pressed; page attrs: %s", attrs)
+                        current_fs = getattr(self.page, 'window_full_screen', False)
+                        if not current_fs:
+                            # Save current bounds (may be None on some platforms)
+                            self._saved_window_bounds = attrs
+                            try:
+                                self.page.window_full_screen = True
+                                logger.debug("Set page.window_full_screen = True")
+                            except Exception:
+                                logger.exception("Failed setting page.window_full_screen")
+                            logger.debug("Entering full-screen (saved bounds: %s)", self._saved_window_bounds)
+                        else:
+                            try:
+                                self.page.window_full_screen = False
+                                logger.debug("Set page.window_full_screen = False")
+                            except Exception:
+                                logger.exception("Failed unsetting page.window_full_screen")
+                            b = getattr(self, '_saved_window_bounds', None)
+                            if b:
+                                try:
+                                    if b.get('width') is not None:
+                                        self.page.window_width = b['width']
+                                    if b.get('height') is not None:
+                                        self.page.window_height = b['height']
+                                    if b.get('x') is not None:
+                                        self.page.window_x = b['x']
+                                    if b.get('y') is not None:
+                                        self.page.window_y = b['y']
+                                except Exception:
+                                    logger.exception("Failed restoring window bounds")
+                                finally:
+                                    self._saved_window_bounds = None
+                            logger.debug("Exiting full-screen, restored bounds")
+                        try:
+                            self.page.update()
+                        except Exception:
+                            pass
+                    except Exception:
+                        logger.exception("Failed toggling full-screen")
+                    return
+
                 # Space key: toggle preview mode / return to live view
                 if nkey in ('', 'space') or key in (' ', 'space'):
                     logger.debug("GUI: key press SPACE (preview_mode=%s)", self._preview_mode)
