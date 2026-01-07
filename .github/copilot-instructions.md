@@ -16,7 +16,7 @@ Purpose: Quickly orient an AI coding agent so it can be productive making focuse
 - Install runtime deps: python -m pip install -r requirements.txt (macOS: `brew install gphoto2` may be required for camera support).
 - Launch app (interactive desktop): python main.py (this runs Flet app).
 - Helpful env vars:
-  - `A7CAM_LOG_LEVEL` (e.g., DEBUG, INFO) — controls logging level
+  - `A7CAM_LOG_LEVEL` (e.g., DEBUG, INFO). Default is **WARNING** to avoid debug/info noise; set to `NONE` or `OFF` to fully disable logging. — controls logging level
   - `A7CAM_LOG_FILE` — path to write a log file
 - There are currently no test scripts in the repository. If needed, add lightweight diagnostic scripts (keyboard, rawpy thumbnail extraction) and/or CI checks.
 

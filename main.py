@@ -9,8 +9,20 @@ from camera_handler import CameraHandler
 from gui import LiveViewGUI
 
 # Configure logging early; allow runtime override via A7CAM_LOG_LEVEL (e.g., DEBUG)
-level_name = os.environ.get('A7CAM_LOG_LEVEL', 'INFO').upper()
-level = getattr(logging, level_name, logging.INFO)
+# Default to WARNING to avoid debug/info noise unless explicitly requested.
+level_name = os.environ.get('A7CAM_LOG_LEVEL')
+if not level_name:
+    # No env var set: silence debug/info by default
+    level = logging.WARNING
+else:
+    level_name_up = level_name.upper()
+    if level_name_up in ('NONE', 'OFF'):
+        # Fully disable logging (useful for tests or very quiet runs)
+        logging.disable(logging.CRITICAL)
+        level = logging.CRITICAL
+    else:
+        level = getattr(logging, level_name_up, logging.WARNING)
+
 log_format = '%(asctime)s %(levelname)s:%(name)s: %(message)s'
 logging.basicConfig(level=level, format=log_format)
 if os.environ.get('A7CAM_LOG_FILE'):
