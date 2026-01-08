@@ -1011,6 +1011,11 @@ class LiveViewGUI:
             self.status_icon.name = ft.Icons.VIDEOCAM
             self.status_icon.color = ft.Colors.AMBER_400
             self.status_text.color = ft.Colors.AMBER_400
+            # Reset any cached live-frame intrinsic size so it will be detected afresh
+            try:
+                self._current_frame_size = None
+            except Exception:
+                pass
             self.streaming_event.set()
             self.frame_thread = threading.Thread(target=self._frame_update_loop, daemon=True)
             self.frame_thread.start()
@@ -1114,6 +1119,11 @@ class LiveViewGUI:
                         if img is not None:
                             h, w = img.shape[:2]
                             self._current_frame_size = (w, h)
+                            # First time we determine the live frame intrinsic size, update guides once
+                            try:
+                                self._update_guide_canvas()
+                            except Exception:
+                                pass
                     else:
                         # Could be a filepath for preview; try reading metadata
                         try:
@@ -1121,15 +1131,61 @@ class LiveViewGUI:
                             if img is not None:
                                 h, w = img.shape[:2]
                                 self._current_frame_size = (w, h)
+                                # Update guides once now that we know the intrinsic size
+                                try:
+                                    self._update_guide_canvas()
+                                except Exception:
+                                    pass
                         except Exception:
                             pass
             except Exception:
                 pass
 
+
             # Page update must be invoked on main loop
             self.page.update()
         except Exception as e:
             logger.exception("Exception in _update_image")
+
+    def _ensure_current_frame_size(self):
+        """Attempt to determine the current live frame intrinsic size from cached frame data.
+
+        Sometimes the live frame size wasn't captured during the initial frame update (e.g. decode failed
+        or frames arrived as different types). This helper tries to derive width/height from
+        self._current_frame (data URI or filepath) and caches the result in
+        `self._current_frame_size` so guide rendering can correctly letterbox to the image area.
+        """
+        try:
+            if hasattr(self, '_current_frame_size') and self._current_frame_size:
+                return
+            cf = getattr(self, '_current_frame', None)
+            if not cf:
+                return
+            # Data URI (live frames)
+            if isinstance(cf, str) and cf.startswith('data:'):
+                try:
+                    b64 = cf.split(',', 1)[1]
+                    data = base64.b64decode(b64)
+                    arr = np.frombuffer(data, dtype=np.uint8)
+                    img = cv2.imdecode(arr, cv2.IMREAD_UNCHANGED)
+                    if img is not None:
+                        h, w = img.shape[:2]
+                        self._current_frame_size = (w, h)
+                        logger.debug("Determined current_frame_size from data URI: %sx%s", w, h)
+                except Exception:
+                    logger.debug("Failed to decode current frame from data URI for size detection")
+            else:
+                # Try reading metadata from filepath
+                try:
+                    img = cv2.imread(cf)
+                    if img is not None:
+                        h, w = img.shape[:2]
+                        self._current_frame_size = (w, h)
+                        logger.debug("Determined current_frame_size from filepath: %sx%s", w, h)
+                except Exception:
+                    logger.debug("Failed to read current frame file for size detection: %s", cf)
+        except Exception:
+            logger.exception("_ensure_current_frame_size error")
 
     async def _reapply_current_frame(self):
         """Reapply the current frame to force a re-render after resize."""
@@ -1548,8 +1604,20 @@ class LiveViewGUI:
             if cw <= 0 or ch <= 0:
                 return
 
+            # Ensure we have a best-effort source image size (try decode cached frame if needed)
+            try:
+                self._ensure_current_frame_size()
+            except Exception:
+                pass
+
             # If we don't know source image size, fall back to full canvas
-            src_w, src_h = getattr(self, '_current_frame_size', (None, None))
+            src = getattr(self, '_current_frame_size', None)
+            if not src:
+                src_w, src_h = (None, None)
+            else:
+                src_w, src_h = src
+            if not src_w or not src_h:
+                logger.debug("_update_guide_canvas: source frame size unknown; drawing guides over full canvas %sx%s", cw, ch)
             if not src_w or not src_h:
                 # fallback: draw over full canvas
                 shapes = self._create_guide_shapes(cw, ch)
@@ -1608,7 +1676,11 @@ class LiveViewGUI:
                 return
 
             # Try to get source preview image size if available
-            src_w, src_h = getattr(self, '_current_preview_size', (None, None))
+            src = getattr(self, '_current_preview_size', None)
+            if not src:
+                src_w, src_h = (None, None)
+            else:
+                src_w, src_h = src
             if not src_w or not src_h:
                 shapes = self._create_guide_shapes(cw, ch)
                 self._preview_guide_canvas.shapes = shapes
@@ -1966,6 +2038,13 @@ class LiveViewGUI:
                 if img is not None:
                     h, w = img.shape[:2]
                     self._current_preview_size = (w, h)
+                    # Recompute preview guide shapes immediately so portrait/landscape images
+                    # get correct, letterboxed guide overlays on each cycle.
+                    try:
+                        logger.debug("Preview image size detected: %sx%s", w, h)
+                        self._update_preview_guide_canvas()
+                    except Exception:
+                        pass
             except Exception:
                 self._current_preview_size = None
             
