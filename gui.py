@@ -214,6 +214,24 @@ class LiveViewGUI:
             self._rotation_buttons[val] = btn
             return btn
 
+        # Full-screen toggle button (left of autorotate)
+        def _make_fullscreen_btn():
+            def _on_click(e):
+                self._toggle_fullscreen()
+            icon = ft.Icon(ft.Icons.FULLSCREEN, color=ft.Colors.WHITE)
+            btn = ft.Container(
+                content=icon,
+                width=ROT_BTN_HEIGHT,
+                height=ROT_BTN_HEIGHT,
+                alignment=ft.Alignment.CENTER,
+                tooltip=t('tooltip_fullscreen'),
+                border=ft.border.all(1, ft.Colors.GREY_700),
+                border_radius=6,
+                on_click=_on_click,
+            )
+            self._fullscreen_btn = btn
+            return btn
+
         # Autorotate toggle button
         def _make_autorotate_btn():
             def _on_click(e):
@@ -234,6 +252,9 @@ class LiveViewGUI:
             return btn
 
         rotation_btns = [
+            _make_fullscreen_btn(),
+            # Small visible gap between fullscreen and autorotate so they're not crowded
+            ft.Container(width=12),
             _make_autorotate_btn(),
             _make_rotation_btn("0", t('rotate_0_label'), t('tooltip_rotation_0')),
             _make_rotation_btn("90", t('rotate_90_label'), t('tooltip_rotation_90')),
@@ -513,16 +534,35 @@ class LiveViewGUI:
         except Exception:
             pass
 
-        # Initialize autorotate button reference and UI
+        # Initialize fullscreen and autorotate button references and UI
         try:
-            # Ensure autorotate button reference exists and update its UI
-            if not hasattr(self, '_autorotate_btn') or self._autorotate_btn is None:
-                try:
-                    if hasattr(self, 'rotate_control') and self.rotate_control is not None and len(self.rotate_control.controls) > 0:
-                        self._autorotate_btn = self.rotate_control.controls[0]
-                except Exception:
-                    pass
-            self._update_autorotate_ui()
+            try:
+                if hasattr(self, 'rotate_control') and self.rotate_control is not None and len(self.rotate_control.controls) > 0:
+                    try:
+                        # Find buttons by icon type (robust to spacer elements)
+                        for ctrl in self.rotate_control.controls:
+                            try:
+                                content = getattr(ctrl, 'content', None)
+                                if isinstance(content, ft.Icon):
+                                    if content.icon == ft.Icons.FULLSCREEN:
+                                        self._fullscreen_btn = ctrl
+                                    elif content.icon == ft.Icons.SCREEN_ROTATION:
+                                        self._autorotate_btn = ctrl
+                            except Exception:
+                                pass
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+            # Update both UIs
+            try:
+                self._update_autorotate_ui()
+            except Exception:
+                pass
+            try:
+                self._update_fullscreen_ui()
+            except Exception:
+                pass
         except Exception:
             pass
 
@@ -843,119 +883,10 @@ class LiveViewGUI:
                         logger.exception("Failed toggling autorotate")
                     return
 
-                # Full-screen toggle: 'f' toggles full-screen and restores previous bounds
+                # Full-screen toggle: 'f'
                 if key == 'f':
                     try:
-                        # If a Window object exists on the page, prefer toggling it directly
-                        win = getattr(self.page, 'window', None)
-                        if win is not None:
-                            # Log current window state
-                            try:
-                                attrs = {
-                                    'full_screen': getattr(win, 'full_screen', None),
-                                    'width': getattr(win, 'width', None),
-                                    'height': getattr(win, 'height', None),
-                                    'left': getattr(win, 'left', None),
-                                    'top': getattr(win, 'top', None),
-                                    'maximized': getattr(win, 'maximized', None),
-                                }
-                            except Exception:
-                                attrs = {'full_screen': None}
-                            logger.info("F key pressed; window attrs: %s", attrs)
-
-                            current_fs = getattr(win, 'full_screen', False)
-                            if not current_fs:
-                                # Save current bounds (may be None on some platforms)
-                                self._saved_window_bounds = {
-                                    'width': getattr(win, 'width', None),
-                                    'height': getattr(win, 'height', None),
-                                    'left': getattr(win, 'left', None),
-                                    'top': getattr(win, 'top', None),
-                                    'maximized': getattr(win, 'maximized', None),
-                                }
-                                try:
-                                    win.full_screen = True
-                                    logger.debug("Set window.full_screen = True")
-                                    win.update()
-                                except Exception:
-                                    logger.exception("Failed setting window.full_screen")
-                                logger.debug("Entering full-screen (saved bounds: %s)", self._saved_window_bounds)
-                            else:
-                                try:
-                                    win.full_screen = False
-                                    logger.debug("Set window.full_screen = False")
-                                    win.update()
-                                except Exception:
-                                    logger.exception("Failed unsetting window.full_screen")
-                                b = getattr(self, '_saved_window_bounds', None)
-                                if b:
-                                    try:
-                                        if b.get('width') is not None:
-                                            win.width = b['width']
-                                        if b.get('height') is not None:
-                                            win.height = b['height']
-                                        if b.get('left') is not None:
-                                            win.left = b['left']
-                                        if b.get('top') is not None:
-                                            win.top = b['top']
-                                        if b.get('maximized') is not None:
-                                            win.maximized = b['maximized']
-                                        win.update()
-                                    except Exception:
-                                        logger.exception("Failed restoring window bounds")
-                                    finally:
-                                        self._saved_window_bounds = None
-                                logger.debug("Exiting full-screen, restored bounds")
-                            return
-
-                        # Fallback: older attribute names on page (some runtimes expose them)
-
-                        attrs = {
-                            'window_full_screen': getattr(self.page, 'window_full_screen', None),
-                            'window_width': getattr(self.page, 'window_width', None),
-                            'window_height': getattr(self.page, 'window_height', None),
-                            'window_x': getattr(self.page, 'window_x', None),
-                            'window_y': getattr(self.page, 'window_y', None),
-                        }
-                        logger.debug("F key pressed; page attrs: %s", attrs)
-                        current_fs = getattr(self.page, 'window_full_screen', False)
-                        if not current_fs:
-                            # Save current bounds (may be None on some platforms)
-                            self._saved_window_bounds = attrs
-                            try:
-                                self.page.window_full_screen = True
-                                logger.debug("Set page.window_full_screen = True")
-                            except Exception:
-                                logger.exception("Failed setting page.window_full_screen")
-                            logger.debug("Entering full-screen (saved bounds: %s)", self._saved_window_bounds)
-                        else:
-                            try:
-                                self.page.window_full_screen = False
-                                logger.debug("Set page.window_full_screen = False")
-                            except Exception:
-                                logger.exception("Failed unsetting page.window_full_screen")
-                            b = getattr(self, '_saved_window_bounds', None)
-                            if b:
-                                try:
-                                    if b.get('width') is not None:
-                                        self.page.window_width = b['width']
-                                    if b.get('height') is not None:
-                                        self.page.window_height = b['height']
-                                    if b.get('x') is not None:
-                                        self.page.window_x = b['x']
-                                    if b.get('y') is not None:
-                                        self.page.window_y = b['y']
-                                except Exception:
-                                    logger.exception("Failed restoring window bounds")
-                                finally:
-                                    self._saved_window_bounds = None
-                            logger.debug("Exiting full-screen, restored bounds")
-                        try:
-                            self.page.update()
-                        except Exception:
-                            pass
-
-
+                        self._toggle_fullscreen()
                     except Exception:
                         logger.exception("Failed toggling full-screen")
                     return
@@ -2222,6 +2153,131 @@ class LiveViewGUI:
                 pass
         except Exception as e:
             logger.exception("_update_autorotate_ui error")
+
+    def _toggle_fullscreen(self):
+        """Toggle the application window full-screen state and update UI."""
+        try:
+            win = getattr(self.page, 'window', None)
+            if win is not None:
+                current_fs = getattr(win, 'full_screen', False)
+                if not current_fs:
+                    # Save current bounds (may be None on some platforms)
+                    self._saved_window_bounds = {
+                        'width': getattr(win, 'width', None),
+                        'height': getattr(win, 'height', None),
+                        'left': getattr(win, 'left', None),
+                        'top': getattr(win, 'top', None),
+                        'maximized': getattr(win, 'maximized', None),
+                    }
+                    try:
+                        win.full_screen = True
+                        win.update()
+                    except Exception:
+                        logger.exception("Failed setting window.full_screen")
+                else:
+                    try:
+                        win.full_screen = False
+                        win.update()
+                    except Exception:
+                        logger.exception("Failed unsetting window.full_screen")
+                    b = getattr(self, '_saved_window_bounds', None)
+                    if b:
+                        try:
+                            if b.get('width') is not None:
+                                win.width = b['width']
+                            if b.get('height') is not None:
+                                win.height = b['height']
+                            if b.get('left') is not None:
+                                win.left = b['left']
+                            if b.get('top') is not None:
+                                win.top = b['top']
+                            if b.get('maximized') is not None:
+                                win.maximized = b['maximized']
+                            win.update()
+                        except Exception:
+                            logger.exception("Failed restoring window bounds")
+                        finally:
+                            self._saved_window_bounds = None
+                # Update UI to reflect state
+                self._update_fullscreen_ui()
+                return
+
+            # Fallback: older attribute names on page
+            current_fs = getattr(self.page, 'window_full_screen', False)
+            if not current_fs:
+                self._saved_window_bounds = {
+                    'width': getattr(self.page, 'window_width', None),
+                    'height': getattr(self.page, 'window_height', None),
+                    'x': getattr(self.page, 'window_x', None),
+                    'y': getattr(self.page, 'window_y', None),
+                }
+                try:
+                    self.page.window_full_screen = True
+                except Exception:
+                    logger.exception("Failed setting page.window_full_screen")
+            else:
+                try:
+                    self.page.window_full_screen = False
+                except Exception:
+                    logger.exception("Failed unsetting page.window_full_screen")
+                b = getattr(self, '_saved_window_bounds', None)
+                if b:
+                    try:
+                        if b.get('width') is not None:
+                            self.page.window_width = b['width']
+                        if b.get('height') is not None:
+                            self.page.window_height = b['height']
+                        if b.get('x') is not None:
+                            self.page.window_x = b['x']
+                        if b.get('y') is not None:
+                            self.page.window_y = b['y']
+                    except Exception:
+                        logger.exception("Failed restoring page bounds")
+                    finally:
+                        self._saved_window_bounds = None
+            try:
+                self.page.update()
+            except Exception:
+                pass
+            self._update_fullscreen_ui()
+        except Exception as e:
+            logger.exception("Failed toggling full-screen")
+
+    def _update_fullscreen_ui(self):
+        """Update the fullscreen button icon/appearance based on current window state."""
+        try:
+            btn = getattr(self, '_fullscreen_btn', None)
+            if not btn:
+                return
+            # Determine current fullscreen state
+            is_fs = False
+            try:
+                win = getattr(self.page, 'window', None)
+                if win is not None:
+                    is_fs = bool(getattr(win, 'full_screen', False))
+                else:
+                    is_fs = bool(getattr(self.page, 'window_full_screen', False))
+            except Exception:
+                pass
+
+            try:
+                if is_fs:
+                    btn.content = ft.Icon(ft.Icons.FULLSCREEN_EXIT, color=ft.Colors.AMBER_400)
+                    btn.bgcolor = "rgba(100,100,255,0.18)"
+                    btn.border = ft.border.all(2, ft.Colors.BLUE_400)
+                else:
+                    btn.content = ft.Icon(ft.Icons.FULLSCREEN, color=ft.Colors.WHITE)
+                    btn.bgcolor = None
+                    btn.border = ft.border.all(1, ft.Colors.GREY_700)
+            except Exception:
+                pass
+
+            try:
+                btn.update()
+            except Exception:
+                pass
+        except Exception as e:
+            logger.exception("_update_fullscreen_ui error")
     
     def _on_orientation_detected(self, orientation_code: int):
         """Callback invoked when EXIF orientation is detected from a downloaded image.
