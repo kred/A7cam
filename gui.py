@@ -58,9 +58,10 @@ class LiveViewGUI:
         
         # Composition guide state
         self._guide_type = "none"  # none, thirds, golden, grid, diagonal, center, fibonacci, fibonacci_vflip, fibonacci_hflip, fibonacci_both, triangles, triangles_flip
-        self._guide_color = "white"  # white, green, red, black
+        self._guide_color = "white"  # white, green, red, yellow, blue, black
         self._guide_types = ["none", "thirds", "golden", "grid", "diagonal", "center", "fibonacci", "fibonacci_vflip", "fibonacci_hflip", "fibonacci_both", "triangles", "triangles_flip"]
-        self._guide_colors = ["white", "green", "red", "black"]
+        # Order chosen to display in two rows: top (white, green, red), bottom (yellow, blue, black)
+        self._guide_colors = ["white", "green", "red", "yellow", "blue", "black"]
         
         # Image preview manager (callback set in _start_stream after method is available)
         self._preview_manager = ImagePreviewManager()
@@ -359,13 +360,21 @@ class LiveViewGUI:
             self._guide_color_buttons[val] = btn
             return btn
 
-        colors = [
+        # Arrange guide colors in two rows (like guide types)
+        top_row_colors = [
             _make_color_btn("white", t('color_white_label'), t('tooltip_color_white'), ft.Colors.WHITE),
             _make_color_btn("green", t('color_green_label'), t('tooltip_color_green'), ft.Colors.GREEN),
             _make_color_btn("red", t('color_red_label'), t('tooltip_color_red'), ft.Colors.RED),
+        ]
+        bottom_row_colors = [
+            _make_color_btn("yellow", t('color_yellow_label'), t('tooltip_color_yellow'), ft.Colors.YELLOW),
+            _make_color_btn("blue", t('color_blue_label'), t('tooltip_color_blue'), ft.Colors.BLUE),
             _make_color_btn("black", t('color_black_label'), t('tooltip_color_black'), ft.Colors.BLACK),
         ]
-        self.guide_color_control = ft.Row(colors, spacing=6)
+        self.guide_color_control = ft.Column([
+            ft.Row(top_row_colors, spacing=6),
+            ft.Row(bottom_row_colors, spacing=6),
+        ], spacing=6)
 
         # Composition guide canvas overlay (transparent, covers the image area)
         self._guide_canvas = cv.Canvas(
@@ -806,9 +815,16 @@ class LiveViewGUI:
                         logger.exception("Failed to cycle guide type")
                     return
                 
-                # Guide color key: C cycles through guide colors
+                # Guide color key: C cycles through guide colors (Shift+C -> reverse)
                 if key == 'c':
-                    self._cycle_guide_color()
+                    try:
+                        logger.debug(f"GUI: cycling guide colors - shift_pressed={shift_pressed}")
+                        if shift_pressed:
+                            self._cycle_guide_color(reverse=True)
+                        else:
+                            self._cycle_guide_color()
+                    except Exception:
+                        logger.exception("Failed to cycle guide color")
                     return
 
                 # Help overlay key: H toggles help in center of screen
@@ -1538,11 +1554,18 @@ class LiveViewGUI:
             self._set_active_guide_type(self._guide_types[next_idx])
         except Exception as e:
             logger.exception("_cycle_guide_type error")
-    def _cycle_guide_color(self):
-        """Cycle to the next guide color."""
+    def _cycle_guide_color(self, reverse: bool = False):
+        """Cycle through guide colors.
+
+        Args:
+            reverse: If True, cycle backward instead of forward.
+        """
         try:
             idx = self._guide_colors.index(self._guide_color)
-            next_idx = (idx + 1) % len(self._guide_colors)
+            if reverse:
+                next_idx = (idx - 1) % len(self._guide_colors)
+            else:
+                next_idx = (idx + 1) % len(self._guide_colors)
             self._set_active_guide_color(self._guide_colors[next_idx])
         except Exception as e:
             logger.exception("_cycle_guide_color error")
@@ -1552,6 +1575,8 @@ class LiveViewGUI:
             "white": ft.Colors.WHITE,
             "green": ft.Colors.GREEN,
             "red": ft.Colors.RED,
+            "yellow": getattr(ft.Colors, 'YELLOW', ft.Colors.YELLOW if hasattr(ft.Colors, 'YELLOW') else ft.Colors.ORANGE),
+            "blue": getattr(ft.Colors, 'BLUE', ft.Colors.BLUE if hasattr(ft.Colors, 'BLUE') else ft.Colors.INDIGO),
             "black": ft.Colors.BLACK,
         }
         color = color_map.get(self._guide_color, ft.Colors.WHITE)
